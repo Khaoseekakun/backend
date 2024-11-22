@@ -13,6 +13,14 @@ func GetEmployee(c *gin.Context) {
 	})
 }
 
+func GetEmployeeByID(c *gin.Context) {
+	id := c.Param("id")
+	c.JSON(http.StatusOK, gin.H{
+		"message": "GET METHOD EMPLOYEE BY ID",
+		"id":      id,
+	})
+}
+
 // POST Method
 func PostEmployee(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
