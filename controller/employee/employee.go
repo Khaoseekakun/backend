@@ -13,6 +13,7 @@ func GetEmployee(c *gin.Context) {
 	})
 }
 
+// GET Method by ID
 func GetEmployeeByID(c *gin.Context) {
 	id := c.Param("id")
 	c.JSON(http.StatusOK, gin.H{
