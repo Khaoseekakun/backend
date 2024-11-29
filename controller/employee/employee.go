@@ -18,7 +18,7 @@ type Tbl_employee struct {
 func GetMain(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "ok",
-		"message": "Please use path /employee",
+		"message": "Please use path /employeedb",
 	})
 }
 
