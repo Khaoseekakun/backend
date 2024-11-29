@@ -28,7 +28,10 @@ func GetMain(c *gin.Context) {
 }
 
 func GetEmployee(c *gin.Context) {
-	c.IndentedJSON(http.StatusOK, employees)
+	c.IndentedJSON(http.StatusOK, gin.H{
+		"data":   employees,
+		"status": "ok",
+	})
 }
 
 func GetEmployeeByID(c *gin.Context) {
