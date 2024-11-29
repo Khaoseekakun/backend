@@ -21,8 +21,8 @@ func main() {
 
 	router := gin.Default()
 	router.GET("/", EmployeeController.GetMain)
-	router.GET("/employee", EmployeeController.GetEmployeeDB)
-	router.GET("/employee/:id", EmployeeController.GetEmployeeByID)
+	router.GET("/employeedb", EmployeeController.GetEmployeeDB)
+	router.GET("/employeedb/:id", EmployeeController.GetEmployeeByID)
 	router.POST("/employee", EmployeeController.PostEmployee)
 	router.PUT("/employee", EmployeeController.PutEmployee)
 	router.DELETE("/employee", EmployeeController.DeleteEmployee)
