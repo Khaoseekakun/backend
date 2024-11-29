@@ -6,6 +6,7 @@ import (
 	"backend/api/db"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type Tbl_employee struct {
@@ -25,6 +26,33 @@ func GetEmployeeDB(c *gin.Context) {
 	var employee []Tbl_employee
 	db.Db.Find(&employee)
 	c.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Employee Read Success", "employees": employee})
+}
+
+func GetEmployeeByID(c *gin.Context) {
+	empID := c.Param("id")
+
+	var employee Tbl_employee
+
+	if err := db.Db.Where("emp_id = ?", empID).First(&employee).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			c.JSON(http.StatusNotFound, gin.H{
+				"status":  "error",
+				"message": "Employee not found",
+			})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"status":  "error",
+				"message": "Failed to retrieve employee",
+			})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "ok",
+		"message":  "Employee found",
+		"employee": employee,
+	})
 }
 
 func PostEmployee(c *gin.Context) {
