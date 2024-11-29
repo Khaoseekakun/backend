@@ -9,6 +9,7 @@ import (
 func main() {
 	router := gin.Default()
 	router.GET("/employee", EmployeeController.GetEmployee)
+	router.GET("/", EmployeeController.GetMain)
 	router.GET("/employee/:id", EmployeeController.GetEmployeeByID)
 	router.POST("/employee", EmployeeController.PostEmployee)
 	router.PUT("/employee", EmployeeController.PutEmployee)

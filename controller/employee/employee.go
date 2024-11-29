@@ -6,6 +6,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// GET Methord Main
+func GetMain(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Please use path /employee",
+	})
+}
+
 // GET Method
 func GetEmployee(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
