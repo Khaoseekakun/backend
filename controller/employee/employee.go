@@ -5,6 +5,8 @@ import (
 
 	"backend/api/db"
 
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 )
@@ -18,7 +20,7 @@ type Tbl_employee struct {
 }
 
 type EmployeeBody struct {
-	Emp_id         int     `json:"emp_id" binding:"required"`
+	Emp_id         int     `json:"emp_id"`
 	Emp_firstname  string  `json:"emp_firstname" binding:"required"`
 	Emp_lastname   string  `json:"emp_lastname" binding:"required"`
 	Emp_department string  `json:"emp_department" binding:"required"`
@@ -68,11 +70,9 @@ func GetEmployeeByID(c *gin.Context) {
 func PostEmployeeDB(c *gin.Context) {
 	var json EmployeeBody
 	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid JSON"})
 		return
 	}
-
-	//check body request
 
 	tbl_employee := Tbl_employee(json)
 	db.Db.Create(&tbl_employee)
@@ -81,7 +81,6 @@ func PostEmployeeDB(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, gin.H{"status": "error", "message": "User Failed", "tbl_fund": tbl_employee})
 	}
-
 }
 
 func PostEmployee(c *gin.Context) {
@@ -91,7 +90,6 @@ func PostEmployee(c *gin.Context) {
 	})
 }
 
-// PUT Method
 func PutEmployee(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "PUT METHOD EMPLOYEE",
@@ -102,6 +100,29 @@ func PutEmployee(c *gin.Context) {
 func PutEmployeeDB(c *gin.Context) {
 	empID := c.Param("id")
 
+	var json EmployeeBody
+
+	if err := c.ShouldBindJSON(&json); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
+		return
+	}
+
+	if empID == "" {
+		if json.Emp_id == 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "emp_id is required add to path or body", "sample": "{emp_id:1} or employeedb/1"})
+			return
+		}
+
+		empID = strconv.Itoa(json.Emp_id)
+	} else {
+		id, err := strconv.Atoi(empID)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid Emp_id"})
+			return
+		}
+		json.Emp_id = id
+	}
+
 	var employee Tbl_employee
 
 	if err := db.Db.Where("emp_id = ?", empID).First(&employee).Error; err != nil {
@@ -119,22 +140,22 @@ func PutEmployeeDB(c *gin.Context) {
 		return
 	}
 
-	var json EmployeeBody
-	if err := c.ShouldBindJSON(&json); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	tbl_employee := Tbl_employee(json)
+	if err := db.Db.Where("emp_id = ?", empID).Model(&employee).Updates(tbl_employee).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "error",
+			"message": "Failed to update employee",
+			"error":   err.Error(),
+		})
 		return
 	}
-
-	tbl_employee := Tbl_employee(json)
-	db.Db.Where("emp_id = ?", empID).Model(&employee).Updates(tbl_employee)
 	c.JSON(http.StatusOK, gin.H{
 		"status":   "ok",
 		"message":  "Employee updated",
-		"employee": employee,
+		"employee": tbl_employee,
 	})
 }
 
-// DELETE Method
 func DeleteEmployee(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"message": "DELETE METHOD EMPLOYEE",
@@ -144,7 +165,14 @@ func DeleteEmployee(c *gin.Context) {
 
 func DeleteEmployeeDB(c *gin.Context) {
 	empID := c.Param("id")
-
+	var json EmployeeBody
+	if empID == "" {
+		if err := c.ShouldBindJSON(&json); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "emp_id is required add to path or body", "sample": "{emp_id:1} or employeedb/1"})
+			return
+		}
+		empID = strconv.Itoa(json.Emp_id)
+	}
 	var employee Tbl_employee
 
 	if err := db.Db.Where("emp_id = ?", empID).First(&employee).Error; err != nil {
@@ -160,15 +188,12 @@ func DeleteEmployeeDB(c *gin.Context) {
 			})
 		}
 		return
-	} else {
-		//delete and check if record exist
-		db.Db.Where("emp_id = ?", empID).Delete(&employee)
-		c.JSON(http.StatusOK, gin.H{
-			"status":   "ok",
-			"message":  "Employee deleted",
-			"employee": employee,
-		})
-
 	}
 
+	db.Db.Where("emp_id = ?", empID).Delete(&employee)
+	c.JSON(http.StatusOK, gin.H{
+		"status":   "ok",
+		"message":  "Employee deleted",
+		"employee": employee,
+	})
 }
