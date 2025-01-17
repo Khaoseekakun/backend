@@ -27,6 +27,10 @@ type EmployeeBody struct {
 	Emp_salary     float64 `json:"emp_salary" binding:"required"`
 }
 
+type EmployeeDelete struct {
+	Emp_id int `json:"emp_id"`
+}
+
 func GetMain(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"status":  "ok",
@@ -71,6 +75,11 @@ func PostEmployeeDB(c *gin.Context) {
 	var json EmployeeBody
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid JSON"})
+		return
+	}
+
+	if json.Emp_id == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Emp_id is required"})
 		return
 	}
 
@@ -165,14 +174,15 @@ func DeleteEmployee(c *gin.Context) {
 
 func DeleteEmployeeDB(c *gin.Context) {
 	empID := c.Param("id")
-	var json EmployeeBody
+	var json EmployeeDelete
 	if empID == "" {
 		if err := c.ShouldBindJSON(&json); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "emp_id is required add to path or body", "sample": "{emp_id:1} or employeedb/1"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Emp_id is required add to path or body", "sample": "{Emp_id:1} or employeedb/1"})
 			return
 		}
 		empID = strconv.Itoa(json.Emp_id)
 	}
+
 	var employee Tbl_employee
 
 	if err := db.Db.Where("emp_id = ?", empID).First(&employee).Error; err != nil {
