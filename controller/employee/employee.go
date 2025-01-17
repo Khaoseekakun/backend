@@ -12,7 +12,7 @@ import (
 )
 
 type Tbl_employee struct {
-	Emp_id         int
+	Emp_id         int `gorm:"primaryKey"`
 	Emp_firstname  string
 	Emp_lastname   string
 	Emp_department string
@@ -75,11 +75,6 @@ func PostEmployeeDB(c *gin.Context) {
 	var json EmployeeBody
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Invalid JSON"})
-		return
-	}
-
-	if json.Emp_id == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"status": "error", "message": "Emp_id is required"})
 		return
 	}
 
